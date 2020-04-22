@@ -12,7 +12,7 @@
 #define EPSILON 	2 /*ˮƽ����ѧϰϵͳ*/
 #define SEED 		32767 /*�������seed*/
 
-//#define SWAP((t),(x),(y)   
+#define SWAP(x,y,t) ((t)=(x),(x)=(y),(y)=(t))   
 
 typedef struct _pid_t_
 {
@@ -40,8 +40,13 @@ typedef struct _pid_t_
 	 
 }pid_t;
 
+typedef struct _reference_t_
+{
+  uint8_t key_automatic_flag;
 
-extern pid_t gpid_t;
+
+}reference_t;
+
 
 typedef struct _pid_reference
 {
@@ -54,11 +59,14 @@ typedef struct _pid_reference
  float  KD_V;
 
 } tpid_refer;
+
 extern tpid_refer pid_r;
+extern pid_t gpid_t;
 
 
 
-uint8_t SWAP(uint8_t *p1,uint8_t *p2);
+
+//uint8_t SWAP(uint8_t *p1,uint8_t *p2);
 void Self_Locking(int16_t standerd);
 void Vertical_Decelerate(void);
 void Horizon_Decelerate(void);

@@ -291,7 +291,7 @@ void Vertical_Decelerate(void)
 	*
 	*
 ****************************************/
-
+#if 0
 uint8_t SWAP(uint8_t *p,uint8_t *q)
 {
      uint8_t temp = *p;
@@ -304,6 +304,7 @@ uint8_t SWAP(uint8_t *p,uint8_t *q)
 	 else return *q;
 
 }
+#endif 
 /***********************************************
 	*
 	*Function Name:void Self_Locking(void)
@@ -324,7 +325,7 @@ void Self_Locking(int16_t svalue)
    
    
    ldiff_value = self_temp - svalue ;
-   if(ldiff_value == 0 || ldiff_value - 1==0 || ldiff_value + 1 ==0){
+   if(ldiff_value > 0){ /* to motor run horizon */
 
          if(Dir ==0){
 
@@ -343,6 +344,7 @@ void Self_Locking(int16_t svalue)
 		 	}
    
    	}
+    if(ldiff_value < 0){ /* motor to move vertical   */
    	while(ldiff_value > 2||ldiff_value < -2){
    	
 			error =lvalue - en_t.X_axis ; /*  pid error  */
@@ -371,7 +373,7 @@ void Self_Locking(int16_t svalue)
 			
    		}
    
-
+    	}
 
 }
 /************************************************

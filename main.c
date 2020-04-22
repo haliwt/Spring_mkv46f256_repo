@@ -19,8 +19,8 @@
 #include "fsl_pwm.h"
 #include "pin_mux.h"
 #include "fsl_xbara.h"
-#include "led.h"
-#include "key.h"
+#include "bsp_led.h"
+#include "bsp_key.h"
 #include "bsp_bldc.h"
 #include "adc.h"
 #include "pollingusart.h"
@@ -44,7 +44,8 @@ int32_t PID_Result;
 PID_TypeDef  sPID;
 __IO int32_t  PID_PWM_Duty;
 BLDC_Typedef BLDCMotor;
-//tpid_refer pid_r;
+reference_t greference_t ;
+
 
  
 /*******************************************************************************
@@ -58,14 +59,14 @@ int main(void)
 {
     
      enc_config_t mEncConfigStruct;
-	 volatile int32_t iError,last_iError,ivError,last_ivError ;
+
     
      uint8_t ucKeyCode=0;
-     uint8_t RxBuffer[5],i,k0;
+     uint8_t RxBuffer[5],i,k0,j=0;
      
      volatile int16_t DectBuf[6];
      volatile uint16_t Time_CNT,EnBuf[2]={0,0};
-	 volatile int32_t mCurPosValue=0,mHoldPos=0,HDff,VDff,Dff;
+	 volatile int32_t mCurPosValue=0,mHoldPos=0;
 	 int16_t lkeydir;
    
     XBARA_Init(XBARA);
@@ -209,13 +210,18 @@ int main(void)
  		  
           Dir =0;
 		  PRINTF("flag=2 stop CurrPos !!!!!!!\n");
-		  #if 0//AUTOMATICA 
-		   Dir = 1;
-		   en_t.HorizonStop_flag= 0;
-           motor_ref.motor_run =1;
-		   en_t.DIR_flag = 1;
-
-           #endif
+		 if(greference_t.key_automatic_flag==1){
+		 	 en_t.HorizonStop_flag= 0;
+             motor_ref.motor_run =1;
+		     en_t.DIR_flag = 1;
+		     for(lkeydir=0;lkeydir< 500;lkeydir++){
+				  Dir =1;
+				  PWM_Duty =50; /*real be test*/
+		          uwStep = HallSensor_GetPinState();
+		          HALLSensor_Detected_BLDC(PWM_Duty);
+				}
+		     
+		  }
 		  // Self_Locking();
 		  
 		  
@@ -226,7 +232,6 @@ int main(void)
 		    en_t.HorizonStop_flag=0;
 			PMW_AllClose_ABC_Channel();
 			HALL_Pulse =0;
-			iError =0;
 			#ifdef DRV8302
 			GPIO_PinWrite(DRV8302_EN_GATE_GPIO,DRV8302_EN_GATE_GPIO_PIN,0);
 			#endif 
@@ -261,13 +266,14 @@ int main(void)
                         }
 		          
 					}
-         #if AUTOMATICA 
+       
+		 if(greference_t.key_automatic_flag==1){
 		   Dir = 0;
 		   en_t.HorizonStop_flag= 0;
            motor_ref.motor_run =1;
 		   en_t.DIR_flag = 1;
-
-           #endif
+		 }
+           
 		
     }
             
@@ -332,12 +338,7 @@ int main(void)
 				   HALL_Pulse =0;
 				   PRINTF("DIR =000000000\r\n");
 	  			   
-			    
-				 
-			       
-			   
-			
-           		break;
+			    break;
 				case MOTOR_STOP_PRES:
                      en_t.HorizonStop_flag=0;
 					 motor_ref.motor_run = 3;
@@ -345,7 +346,18 @@ int main(void)
 				     BLDCMotor.Lock_Time=0;
                      PRINTF("motor stop = %d \n\r",motor_ref.motor_run);
                  break;
-				case USART_RT_PRES:
+				case USART_RT_PRES:/*automaitc be test */
+
+				   j++;
+				   if(j==1){
+				      greference_t.key_automatic_flag = 1;
+					  printf("AUTO BE TEST @@@@@@@@@@@@@@@@@@@@@@@@\n");
+				   	}
+				   else{
+				   	    j=0;
+						greference_t.key_automatic_flag = 0;
+				   	}
+				   
 					 
 				break;
             default :
