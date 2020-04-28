@@ -16,6 +16,7 @@ __IO int8_t Dir; //电机方向
 __IO uint16_t  PWM_Duty= 20;	 //占空比
 
 
+
 //
 
 /**********************************************************
@@ -203,7 +204,7 @@ static void PWM_DRV_Init3PhPwm(void)
     uint16_t deadTimeVal;
     pwm_signal_param_t pwmSignal[2];
     uint32_t pwmSourceClockInHz;
-    uint32_t pwmFrequencyInHz = 580;//580;//600;//20000;//edit 2020.02.25//20000;//60000 //1.3KHZ
+    uint32_t pwmFrequencyInHz = 20000;//1000;//600;//20000;//edit 2020.02.25//20000;//60000 //1.3KHZ
 
 
     pwmSourceClockInHz = PWM_SRC_CLK_FREQ;
@@ -290,7 +291,7 @@ void HALLSensor_Detected_BLDC(uint16_t duty)
      
       /*  Channe3 configuration B+  */
          PWMA_Select_BC_Channel(1,duty);
-    
+        
       
       //  PRINTF("uwStep = %d\n",uvw);
       break;
@@ -298,12 +299,12 @@ void HALLSensor_Detected_BLDC(uint16_t duty)
     case 6: //STM32 A+ C- //  C+ A-
       /*  Channe3 configuration */ 
         PWMA_Close_ABC_Channel(1); //close B channel 
-   
+         
     
       /*  Channel configuration A+ */
          PWMA_Select_AB_Channel(1,duty);
       
-    
+      
      // PRINTF("uwStep = %d\n",uvw);
       break;
     case 2: //STM32 A+ B- // //C+ B-
@@ -312,7 +313,7 @@ void HALLSensor_Detected_BLDC(uint16_t duty)
          PWMA_Close_ABC_Channel(2); //close C channel 
      
          PWMA_Select_AB_Channel(0,duty);
-         
+       
          break;
     
     
@@ -322,7 +323,7 @@ void HALLSensor_Detected_BLDC(uint16_t duty)
       
         /*  Channe2 configuration */
          PWMA_Select_CA_Channel(1,duty);
-      
+        
       break;
     
     case 1: //STM32 C+ A- 
@@ -331,7 +332,7 @@ void HALLSensor_Detected_BLDC(uint16_t duty)
         PWMA_Close_ABC_Channel(1); //close B channel 
  
         PWMA_Select_CA_Channel(0,duty);
-    
+      
       break;
     
     

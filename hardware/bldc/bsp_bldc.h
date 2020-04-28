@@ -65,7 +65,8 @@ extern __IO int32_t  PID_PWM_Duty ;
 extern __IO int8_t Dir;
 
 
-extern __IO int32_t HALL_Pulse;  
+extern __IO int32_t HALL_Pulse; 
+
 
 
 

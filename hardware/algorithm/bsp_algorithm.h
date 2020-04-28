@@ -43,10 +43,11 @@ typedef struct _pid_t_
 typedef struct _reference_t_
 {
   uint8_t key_automatic_flag;
-
+  volatile int16_t stdBuf[2];
 
 }reference_t;
 
+extern reference_t refer_t;
 
 typedef struct _pid_reference
 {
@@ -67,14 +68,18 @@ extern pid_t gpid_t;
 
 
 //uint8_t SWAP(uint8_t *p1,uint8_t *p2);
+void Spring_Itself_Check(void);
+
 void Self_Locking(int16_t standerd);
-void Vertical_Decelerate(void);
-void Horizon_Decelerate(void);
+void Spring_Vertical_Decelerate(void);
+void Spring_Horizon_Decelerate(void);
 
 void Search_Start_VerticalPos(void); /* look for start vertical position*/
 void Search_Start_HorizonPos(void);
 void iPrintf(void);
 void Balance_HorizonRegion(void);
+void Stop_Fun(void);
+
 
 
 
