@@ -209,17 +209,18 @@ void Spring_Vertical_Decelerate(void)
 {
 	uint16_t ldectnum;
 	
-	en_t.Vertical_HALL_Pulse = abs(HALL_Pulse) ;
+	//en_t.Vertical_HALL_Pulse = abs(HALL_Pulse) ;
   // if(en_t.Vertical_check_n == 0){
    	
 	//	CoilSpring_Run_VerticalLockHall();
 		
   // 	}
   // else{
+	//  printf("en_t.X_axis= %d\r\n",en_t.X_axis);
 	   if(abs(en_t.X_axis) > 100){
 			
 			 
-			 if( (2*en_t.X_axis - en_t.Vertical_HALL_Pulse < 50) || (2 * en_t.X_axis -100) < abs(HALL_Pulse)){
+			 if( (abs(en_t.X_axis) -500) < abs(HALL_Pulse) ){ //|| (2 * en_t.X_axis -8000) < abs(HALL_Pulse)){
 			  
 				for(ldectnum =0;ldectnum<90;ldectnum++){
 				 ldectnum++;

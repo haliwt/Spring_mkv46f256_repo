@@ -331,6 +331,7 @@ int main(void)
 		
 				 case DIR_CCW_PRES: //Dir = 0;PTE24 = CCW,KEY3,水平方向
 				    Dir = 0 ; //
+					HALL_Pulse =0 ;
 					en_t.DIR_flag = 1;
 				    en_t.CCW_flag = 1;
 				 	if(en_t.eInit_n !=1)HALL_Pulse =0;
