@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include "bsp_algorithm.h"
+
+static void CoilSpring_Run_VerticalLockHall(void);
+
 reference_t refer_t;
 
 tpid_refer pid_r={0.1f,0.01f,0.1f,0.5f,0.01f,0.5f};
+
 /****************************************************
 	*
 	*Function Name:void Spring_Itself_Check(void)
@@ -29,9 +33,8 @@ void Spring_Itself_Check(void)
 		    cnt = 0;
 		    mn ++ ;
 		    if(mn==1) refer_t.stdBuf[0]= HALL_Pulse;
-		    if(mn==2){
-		     refer_t.stdBuf[1]= HALL_Pulse;
-		    }
+		    if(mn==2)refer_t.stdBuf[1]= HALL_Pulse;
+		    
 		     printf("stdBuf[0] : %d\r\n", refer_t.stdBuf[0]);
 		     printf("stdBuf[1] : %d\r\n", refer_t.stdBuf[1]);
 		     en_t.Pos_diff = abs(abs(refer_t.stdBuf[1])-abs(refer_t.stdBuf[0]));
@@ -87,15 +90,10 @@ void Spring_Itself_Check(void)
 *****************************************************/
 void Search_Start_HorizonPos(void)
 {
-	
-
-				 PWM_Duty =90;
-               
-                 uwStep = HallSensor_GetPinState();
-	             HALLSensor_Detected_BLDC(PWM_Duty);
+	PWM_Duty =90;
+	uwStep = HallSensor_GetPinState();
+	HALLSensor_Detected_BLDC(PWM_Duty);
 				
-			
-                
 }
 /*************************************************************
 	*
@@ -107,16 +105,10 @@ void Search_Start_HorizonPos(void)
 *************************************************************/
 void Search_Start_VerticalPos(void)
 {
-	int16_t std0=0,std1=0;
+	
 	PWM_Duty =90;
-
 	uwStep = HallSensor_GetPinState();
 	HALLSensor_Detected_BLDC(PWM_Duty);
-
-
-
-	
-		 
 }        
             
 /************************************************************
@@ -130,16 +122,15 @@ void Spring_Horizon_Decelerate(void)
 {
     int16_t iError,last_iError,dError_sum;
 	int16_t lhorizonpos,n;
-    int32_t mCurPosValue;
-	en_t.DIR_flag=0;
-	mCurPosValue = HALL_Pulse;
+    int32_t mHorCurPosValue;
+	mHorCurPosValue = HALL_Pulse;
 	
-	iError =abs(mCurPosValue) - abs(en_t.X_axis) ; /*  pid error  */
-	printf("mCurPosValue= %ld \n\r",mCurPosValue);
+	iError =abs(mHorCurPosValue) - abs(en_t.X_axis) ; /*  pid error  */
+	printf("mCurPosValue= %ld \n\r",mHorCurPosValue);
 	printf("iError = %ld \r\n",iError);
 	
 	if(en_t.X_axis < 30){/*refer vertical*/
-      if((abs(en_t.Y_axis)-mCurPosValue) <50 ){
+      if((abs(en_t.Y_axis)-mHorCurPosValue) <50 ){
 		PWM_Duty =30;
 		uwStep = HallSensor_GetPinState();
 		HALLSensor_Detected_BLDC(PWM_Duty);
@@ -150,12 +141,12 @@ void Spring_Horizon_Decelerate(void)
 		 dError_sum = 0;
 		 iError=0;
 		 last_iError =0;
-         printf("Stop30 CurrPos ##############################: %ld\r\n", mCurPosValue);
+         printf("Stop30 CurrPos ##############################: %ld\r\n", mHorCurPosValue);
 		}
      }
 	else if(abs(en_t.X_axis) >100){
 
-		lhorizonpos =abs(mCurPosValue);
+		lhorizonpos =abs(mHorCurPosValue);
 		if((en_t.X_axis - lhorizonpos) < 50 ){
 			
 				
@@ -169,7 +160,7 @@ void Spring_Horizon_Decelerate(void)
 			iError=0;
 			last_iError =0;
 			if(en_t.Home_flag ==1)en_t.End_flag =1;
-			printf("Stop60 CurrPos : %ld\r\n", mCurPosValue);
+			printf("Stop60 CurrPos : %ld\r\n", mHorCurPosValue);
 			}
 							
 
@@ -202,11 +193,7 @@ void Spring_Horizon_Decelerate(void)
 		PWM_Duty =30;
 		uwStep = HallSensor_GetPinState();
 		HALLSensor_Detected_BLDC(PWM_Duty);
-
-	
 	}
-
-
 
 }
 
@@ -221,65 +208,63 @@ void Spring_Horizon_Decelerate(void)
 void Spring_Vertical_Decelerate(void)
 {
 	uint16_t ldectnum;
-    int32_t mCurPosValue;
-	en_t.DIR_flag =1;
-	mCurPosValue = HALL_Pulse;
-    PWM_Duty=90;
-   // en_t.Pos_diff = (int16_t)ENC_GetHoldPositionDifferenceValue(DEMO_ENC_BASEADDR);
-   if(abs(en_t.X_axis) > 100){
+	
+	en_t.Vertical_HALL_Pulse = abs(HALL_Pulse) ;
+  // if(en_t.Vertical_check_n == 0){
+   	
+	//	CoilSpring_Run_VerticalLockHall();
 		
-		 
-		 if(en_t.X_axis - abs(mCurPosValue) < 50){
-		  
-			for(ldectnum =0;ldectnum<30;ldectnum++){
-			 ldectnum++;
-			 if(ldectnum <=30){
-				 PWM_Duty = 30 - ldectnum;
-			 }
-			 else  PWM_Duty =0;
-			 uwStep = HallSensor_GetPinState();
-			 HALLSensor_Detected_BLDC(PWM_Duty);
-			 printf("V>800 break !!!!!!!\r\n");
-		  }
-		 PMW_AllClose_ABC_Channel();
-		 motor_ref.motor_run =0;
-		 en_t.oneKey_H_flag = 0;
-		 en_t.oneKey_V_flag =1;
-		 if(en_t.Home_flag ==1)en_t.End_flag =1;
-		 printf("V>80\r\n");
-		 printf("V~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
-		 en_t.DIR_flag=0;
-		 }
-		 
-	}
-	else if(abs(en_t.X_axis) < 30 ){
-		
-		 if((abs(en_t.Y_axis)-abs(mCurPosValue))< 50){
-
-	       for(ldectnum =0;ldectnum<30;ldectnum++){
-			 ldectnum++;
-			if(ldectnum <=30){
-				 PWM_Duty = 30 - ldectnum;
-			 }
-			 else  PWM_Duty =0;
-			 uwStep = HallSensor_GetPinState();
-			 HALLSensor_Detected_BLDC(PWM_Duty);
-			 printf("V < 20 break ##########################################\r\n");
+  // 	}
+  // else{
+	   if(abs(en_t.X_axis) > 100){
 			
-		    }
-		 
+			 
+			 if( (2*en_t.X_axis - en_t.Vertical_HALL_Pulse < 50) || (2 * en_t.X_axis -100) < abs(HALL_Pulse)){
+			  
+				for(ldectnum =0;ldectnum<90;ldectnum++){
+				 ldectnum++;
+				 if(ldectnum <=90){
+					 PWM_Duty = 90 - ldectnum;
+				 }
+				 uwStep = HallSensor_GetPinState();
+				 HALLSensor_Detected_BLDC(PWM_Duty);
+				 printf("V>800 break !!!!!!!\r\n");
+			  }
 			 PMW_AllClose_ABC_Channel();
 			 motor_ref.motor_run =0;
-			 en_t.oneKey_H_flag = 0;
-		     en_t.oneKey_V_flag = 1;
-			 en_t.Home_flag = 1;
-			 printf("v100Pos= %d \n\r",mCurPosValue);
-			 printf("V < 100 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\r\n");
-		 
-		}	
-	}
-	
-	
+			 printf("V>80\r\n");
+			 printf("V~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
+			 
+			 }
+			 
+		}
+		else if(abs(en_t.X_axis) < 30 ){
+			
+			 if((abs(en_t.Y_axis)-en_t.Vertical_HALL_Pulse)< 50){
+
+		       for(ldectnum =0;ldectnum<30;ldectnum++){
+				 ldectnum++;
+				if(ldectnum <=30){
+					 PWM_Duty = 30 - ldectnum;
+				 }
+				 else  PWM_Duty =0;
+				 uwStep = HallSensor_GetPinState();
+				 HALLSensor_Detected_BLDC(PWM_Duty);
+				 printf("V < 20 break ##########################################\r\n");
+				
+			    }
+			 
+				 PMW_AllClose_ABC_Channel();
+				 motor_ref.motor_run =0;
+				 en_t.oneKey_H_flag = 0;
+			     en_t.oneKey_V_flag = 1;
+				 en_t.Home_flag = 1;
+				 printf("v100Pos= %d \n\r",en_t.Vertical_HALL_Pulse);
+				 printf("V < 100 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\r\n");
+			 
+			}
+		}
+   //}
 	
 }
 /*****************************************
@@ -465,7 +450,7 @@ void Stop_Fun(void)
 			#ifdef DRV8302
 				GPIO_PinWrite(DRV8302_EN_GATE_GPIO,DRV8302_EN_GATE_GPIO_PIN,0);
 			#endif 
-			  en_t.DIR_flag =1;
+			  
 			  DelayMs(50);
 			  GPIO_PortToggle(GPIOD,1<<BOARD_LED1_GPIO_PIN);
 			  DelayMs(50);
@@ -479,3 +464,68 @@ void Stop_Fun(void)
 
 
 }
+/************************************************
+	*
+	*Function Name:void CoilSpring_Run_VerticalLockHall(void)
+	*Function : motor normal check vertical stop position.
+	*
+	*
+	*
+	*
+*************************************************/
+static void CoilSpring_Run_VerticalLockHall(void)
+{
+     static uint32_t cnt=0;
+     uint32_t loop       = 1U;
+     uint32_t secondLoop = 25U;
+     static int16_t verBuf[2];
+	 static uint8_t mn=0;
+	
+	 en_t.m_n++;
+
+	if (en_t.m_n >= secondLoop)
+	{
+		cnt++;
+		if (cnt >= loop)
+		{
+		    cnt = 0;
+		    mn ++ ;
+		    if(mn==1) verBuf[0]= HALL_Pulse;
+		    if(mn==2) verBuf[1]= HALL_Pulse;
+		    
+		     printf("ver_stdBuf[0] : %d\r\n", verBuf[0]);
+		     printf("ver_stdBuf[1] : %d\r\n", verBuf[1]);
+		     en_t.Pos_diff = abs(abs(verBuf[1])-abs(verBuf[0]));
+
+			printf("coilhall : %d\r\n", HALL_Pulse);
+		    if(mn >=2)mn =0;
+		}
+		
+         en_t.m_n= 0U;
+	  if((verBuf[0] >0 && verBuf[1]<0)||(verBuf[0] <0 && verBuf[1]>0)||en_t.Pos_diff < 25){
+                  
+
+			PWM_Duty = 0;
+			PMW_AllClose_ABC_Channel();
+			HALL_Pulse =0;
+			motor_ref.motor_run=0;
+
+			en_t.X_axis = 0;
+			if(refer_t.stdBuf[1] < 0) en_t.Y_axis = verBuf[1];
+			else if(refer_t.stdBuf[0]< 0)en_t.Y_axis = verBuf[0];
+			en_t.Vertical_check_n ++ ;
+			printf("ver_Y coil: %d\r\n", en_t.Y_axis);
+			printf(" hor_X coil: %d\r\n", en_t.X_axis);
+            printf("coil verBuf[0] : %d\r\n", verBuf[0]);
+			printf("coil verBuf[1] : %d\r\n", verBuf[1]);
+					 
+                   
+      }
+	 
+	}	
+
+
+
+
+}
+

@@ -22,7 +22,6 @@ typedef struct _pid_t_
 	 volatile float   iVError;
 	 volatile float   last_ivError;
 	 volatile float   dvError_sum;
-	 volatile int32_t mCurPosValue;
 	 volatile int32_t mHoldPos;
 	 volatile int32_t mStopHoldPos; /*indication stop Position value*/
 	 volatile int32_t mStopVerPos;
@@ -79,6 +78,7 @@ void Search_Start_HorizonPos(void);
 void iPrintf(void);
 void Balance_HorizonRegion(void);
 void Stop_Fun(void);
+
 
 
 

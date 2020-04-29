@@ -93,8 +93,6 @@ int main(void)
     ENC_DoSoftwareLoadInitialPositionValue(DEMO_ENC_BASEADDR); /* Update the position counter with initial value. */
     #endif
 	Dir=3;
-    en_t.First_Search_HVPos =0;
-    en_t.First_H_dec =0;
 	en_t.HorizonStop_flag=0;
 	
    while(1)
@@ -123,6 +121,8 @@ int main(void)
                LED2 =0;
                DelayMs(50);
                LED2=1;
+               DelayMs(50);
+               LED2 =0;
             }
 		 
         }//end en_t.eIn_n == 0
@@ -167,7 +167,7 @@ int main(void)
          Time_CNT++;
 #if 1    
         /* 100ms arithmetic PID */
-    	if((Time_CNT % 50 == 0)&&(en_t.eInit_n == 1)&&(en_t.HorizonStop_flag !=2)&&(en_t.HorizonStop_flag !=1)){
+    	if((Time_CNT % 25 == 0)&&(en_t.eInit_n == 1)&&(en_t.HorizonStop_flag !=2)&&(en_t.HorizonStop_flag !=1)){
    
            
 			if(Dir == 0)//CCW  Horizion Direction
@@ -185,7 +185,7 @@ int main(void)
 			}
 			
 		}
-	   if(Time_CNT >=50){
+	   if(Time_CNT >=25){
 			Time_CNT = 0;
 			
 	   	}
@@ -232,6 +232,7 @@ int main(void)
     else if(en_t.eInit_n !=0){ 
             
 		Stop_Fun();
+		HALL_Pulse = 0;
          if(motor_ref.motor_run == 3){
 				  UART_ReadBlocking(DEMO_UART, RxBuffer, 5);
 				  PRINTF("PID input referece \n");
@@ -319,8 +320,8 @@ int main(void)
         		
                  case START_PRES:
 				   motor_ref.motor_run =1;
-				   if(en_t.eInit_n !=1)HALL_Pulse =0;
-                  
+				  // if(en_t.eInit_n !=1)HALL_Pulse =0;
+                   HALL_Pulse = 0;
                    en_t.DIR_flag = 1;
                    en_t.HorizonStop_flag =0;
 				   en_t.HorizonStop_flag=0;

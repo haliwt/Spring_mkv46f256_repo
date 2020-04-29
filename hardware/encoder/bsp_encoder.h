@@ -21,15 +21,15 @@ typedef struct _encoder_t_
   volatile uint16_t eInit_n;   //初始化起始位置和终点位置的次数
   int16_t Horizon_HALL_Pulse;  //水平位置hall 方向判断
   int16_t Vertical_HALL_Pulse; //垂直位置hall 方向判断 
-  uint8_t First_H_dec;    //第一次水平检测的标志位。
-  uint8_t First_Search_HVPos;
-  uint8_t HorizonStop_flag; /* 水平停止标志位 */
-  uint8_t DIR_flag; /*方向标志位*/
+  uint8_t Vertical_check_n;
+  uint8_t DIR_flag;
+  uint8_t HorizonStop_flag;
   uint8_t oneKey_H_flag;
   uint8_t oneKey_V_flag;
   int16_t Pos_diff; /*phaseA - phaseB value*/
   uint32_t Start_n;
   uint8_t CCW_flag;
+  uint8_t m_n;
  }encoder_t;
 
 extern encoder_t en_t;
