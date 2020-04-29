@@ -151,7 +151,7 @@ int main(void)
              uwStep = HallSensor_GetPinState();
 	         HALLSensor_Detected_BLDC(PWM_Duty);
 	  	}
-		mCurPosValue = HALL_Pulse ; /* current read hall pulse   */
+		
 		
     
 #if 0

@@ -181,7 +181,7 @@ void Spring_Horizon_Decelerate(void)
 
 		last_iError = iError;
 		PWM_Duty = PID_PWM_Duty;
-		HALL_Pulse =0;
+		
 		
 	if(en_t.HorizonStop_flag ==2){
 		Dir = 1;
@@ -366,12 +366,12 @@ void Balance_HorizonRegion(void)
 	uint16_t z=0;
 	
 	mCurPosValue = HALL_Pulse; /*read current position of value*/
-	lhorizonpos =abs(abs(en_t.X_axis) - abs(mCurPosValue));
+	lhorizonpos =abs(abs(en_t.X_axis) - abs(HALL_Pulse));
 
 	printf("stop lhorizonpos = %d \n",lhorizonpos);
 
-	if(en_t.X_axis < 30){
-			if(lhorizonpos <=5 ){
+	if(en_t.X_axis < 100){
+			if(lhorizonpos <=100 ){
 
 				for(z=0;z<50;z++){
 					
@@ -381,31 +381,29 @@ void Balance_HorizonRegion(void)
 				PWM_Duty =PID_PWM_Duty ;
 				uwStep = HallSensor_GetPinState();
 				HALLSensor_Detected_BLDC(PWM_Duty);
-				printf("HorStopPos flag=1 300 : %d\r\n", mCurPosValue);
-			
+				
+			   motor_ref.motor_run =0;
 			
 				DelayMs(1);
-				mCurPosValue = HALL_Pulse;
-				if(abs(mCurPosValue)==(abs(en_t.X_axis -1))||abs(mCurPosValue)>(abs(en_t.X_axis)-1))
-				en_t.HorizonStop_flag =2;
+				Stop_Fun();
+				printf("X_axis <100 ~~~~~~~~~~~~~~~~~~~~~~\n");
+				
 			}
 	   }
 	}
-	else if(en_t.X_axis > 80){
-				if(lhorizonpos <=5){
-					for(z=0;z<50;z++){
+	else if(en_t.X_axis > 800){
+				if(lhorizonpos > 50){
+					for(z=0;z<70;z++){
 			           
 						PID_PWM_Duty =PID_PWM_Duty - z;
 						if(PID_PWM_Duty <= 0)PID_PWM_Duty =0;
 						PWM_Duty =PID_PWM_Duty ;
 						uwStep = HallSensor_GetPinState();
 						HALLSensor_Detected_BLDC(PWM_Duty);
-						printf("X_axis : %d\r\n", mCurPosValue);
-						
+						motor_ref.motor_run =0;
 						DelayMs(1);
-						mCurPosValue = HALL_Pulse;
-						if(abs(mCurPosValue)==(abs(en_t.X_axis -1))||abs(mCurPosValue)>(abs(en_t.X_axis)-1))
-						en_t.HorizonStop_flag =2;
+						printf("X_axis>800 Stop&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
+						Stop_Fun();
 					}
 				}
 	 }
@@ -438,23 +436,16 @@ void iPrintf(void)
 **********************************************************/
 void Stop_Fun(void)
 {
-	        en_t.HorizonStop_flag=0;
+	       
 			PWM_Duty =0 ;
 			PMW_AllClose_ABC_Channel();
 			
-			#ifdef DRV8302
-				GPIO_PinWrite(DRV8302_EN_GATE_GPIO,DRV8302_EN_GATE_GPIO_PIN,0);
-			#endif 
+		
 			  
 			  DelayMs(50);
 			  GPIO_PortToggle(GPIOD,1<<BOARD_LED1_GPIO_PIN);
 			  DelayMs(50);
-			  if(en_t.Home_flag ==1||en_t.End_flag ==1){
-				}
-			  else{ 
-				 en_t.oneKey_H_flag= 0;
-				 en_t.oneKey_V_flag = 0;
-			  }
+			  
 
 
 
