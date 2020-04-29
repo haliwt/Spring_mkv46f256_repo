@@ -90,7 +90,7 @@ void Spring_Itself_Check(void)
 *****************************************************/
 void Search_Start_HorizonPos(void)
 {
-	PWM_Duty =90;
+	PWM_Duty =70;
 	uwStep = HallSensor_GetPinState();
 	HALLSensor_Detected_BLDC(PWM_Duty);
 				
@@ -106,7 +106,7 @@ void Search_Start_HorizonPos(void)
 void Search_Start_VerticalPos(void)
 {
 	
-	PWM_Duty =90;
+	PWM_Duty =70;
 	uwStep = HallSensor_GetPinState();
 	HALLSensor_Detected_BLDC(PWM_Duty);
 }        
@@ -173,7 +173,9 @@ void Spring_Horizon_Decelerate(void)
 		PID_PWM_Duty = (int32_t)(iError *pid_r.KP_H + dError_sum * pid_r.KI_H + (iError - last_iError)*pid_r.KD_H);//proportion + itegral + differential
 
 		printf("hor_pwm= %ld\r \n",PID_PWM_Duty);
-
+        
+        if(abs(PID_PWM_Duty) >=70) PID_PWM_Duty =70;
+        
 		PID_PWM_Duty = abs(PID_PWM_Duty);
 	
 
@@ -208,24 +210,16 @@ void Spring_Horizon_Decelerate(void)
 void Spring_Vertical_Decelerate(void)
 {
 	uint16_t ldectnum;
-	
-	//en_t.Vertical_HALL_Pulse = abs(HALL_Pulse) ;
-  // if(en_t.Vertical_check_n == 0){
-   	
-	//	CoilSpring_Run_VerticalLockHall();
-		
-  // 	}
-  // else{
-	//  printf("en_t.X_axis= %d\r\n",en_t.X_axis);
+
 	   if(abs(en_t.X_axis) > 100){
 			
 			 
-			 if( (abs(en_t.X_axis) -500) < abs(HALL_Pulse) ){ //|| (2 * en_t.X_axis -8000) < abs(HALL_Pulse)){
+			 if((abs(en_t.X_axis) + 4000) <= abs(HALL_Pulse)){ //|| (2 * en_t.X_axis -8000) < abs(HALL_Pulse)){
 			  
-				for(ldectnum =0;ldectnum<90;ldectnum++){
+				for(ldectnum =0;ldectnum<70;ldectnum++){
 				 ldectnum++;
-				 if(ldectnum <=90){
-					 PWM_Duty = 90 - ldectnum;
+				 if(ldectnum <=70){
+					 PWM_Duty = 70 - ldectnum;
 				 }
 				 uwStep = HallSensor_GetPinState();
 				 HALLSensor_Detected_BLDC(PWM_Duty);

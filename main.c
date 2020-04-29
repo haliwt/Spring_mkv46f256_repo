@@ -94,6 +94,8 @@ int main(void)
     #endif
 	Dir=3;
 	en_t.HorizonStop_flag=0;
+	refer_t.stdBuf[0]=0;
+	refer_t.stdBuf[1]=0;
 	
    while(1)
    {
@@ -101,28 +103,23 @@ int main(void)
 	
     /***********Position :Home and End*****************/
         if(en_t.eInit_n !=1){
-          
-		   PWM_Duty =90;
-		   Spring_Itself_Check();
-           //mHoldPos = HALL_Pulse;
-		  // printf("en_mHoldPos = %d \r\n",mHoldPos);
-		 
-            if(Dir==0){/*Horizon Position*/
+           
+          Spring_Itself_Check();
+		 if(Dir==0){/*Horizon Position*/
 
 			     Search_Start_HorizonPos();
+                
 			   
             }
 			else if(Dir == 1){
 
 				Search_Start_VerticalPos();
+              
           
            }
             else{
-               LED2 =0;
-               DelayMs(50);
-               LED2=1;
-               DelayMs(50);
-               LED2 =0;
+               LED2 = 1;
+              
             }
 		 
         }//end en_t.eIn_n == 0
@@ -131,7 +128,7 @@ int main(void)
      if((motor_ref.motor_run == 1)&&(en_t.HorizonStop_flag !=2)&&(en_t.eInit_n !=0))
      {
    		  if(en_t.eInit_n ==1){
-	          if(en_t.DIR_flag ==1)PWM_Duty =90;
+	          if(en_t.DIR_flag ==1)PWM_Duty =70;
 
 			  else PWM_Duty = PID_PWM_Duty;
    		  }
@@ -150,7 +147,7 @@ int main(void)
 	          HALLSensor_Detected_BLDC(PWM_Duty);
 	  	}
 	   else{
-	  	     PWM_Duty =90;
+	  	     PWM_Duty =70;
              uwStep = HallSensor_GetPinState();
 	         HALLSensor_Detected_BLDC(PWM_Duty);
 	  	}
