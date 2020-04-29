@@ -66,6 +66,7 @@ void Spring_Itself_Check(void)
                       else { /*run to vertical direction*/
                           if(refer_t.stdBuf[1] < 0) en_t.Y_axis = refer_t.stdBuf[1];
                           else if(refer_t.stdBuf[0]< 0)en_t.Y_axis = refer_t.stdBuf[0];
+						  en_t.X_axis=0;
                           printf("ver_Y 11: %d\r\n", en_t.Y_axis);
                           printf(" hor_X 11: %d\r\n", en_t.X_axis);
                           
@@ -120,17 +121,16 @@ void Search_Start_VerticalPos(void)
 *************************************************************/
 void Spring_Horizon_Decelerate(void)
 {
-    int16_t iError,last_iError,dError_sum;
-	int16_t lhorizonpos,n;
-    int32_t mHorCurPosValue;
-	mHorCurPosValue = HALL_Pulse;
+    volatile int32_t iError,last_iError,dError_sum;
 	
-	iError =abs(mHorCurPosValue) - abs(en_t.X_axis) ; /*  pid error  */
-	printf("mCurPosValue= %ld \n\r",mHorCurPosValue);
+	
+	iError = HALL_Pulse - en_t.X_axis; /*  pid error  */
+	printf("mHor X axis= %d \n\r",en_t.X_axis);
 	printf("iError = %ld \r\n",iError);
 	
-	if(en_t.X_axis < 30){/*refer vertical*/
-      if((abs(en_t.Y_axis)-mHorCurPosValue) <50 ){
+	
+	if(en_t.X_axis < 200){/*refer vertical*/
+      if(abs((abs(en_t.Y_axis)-HALL_Pulse)) <50 ){
 		PWM_Duty =30;
 		uwStep = HallSensor_GetPinState();
 		HALLSensor_Detected_BLDC(PWM_Duty);
@@ -141,13 +141,13 @@ void Spring_Horizon_Decelerate(void)
 		 dError_sum = 0;
 		 iError=0;
 		 last_iError =0;
-         printf("Stop30 CurrPos ##############################: %ld\r\n", mHorCurPosValue);
+         printf("Stop30 CurrPos ##############################: %ld\r\n",HALL_Pulse);
 		}
      }
-	else if(abs(en_t.X_axis) >100){
+	else if(abs(en_t.X_axis) >800){
 
-		lhorizonpos =abs(mHorCurPosValue);
-		if((en_t.X_axis - lhorizonpos) < 50 ){
+		
+		if((en_t.X_axis - HALL_Pulse) < 50 ){
 			
 				
 				PWM_Duty =30;
@@ -160,7 +160,7 @@ void Spring_Horizon_Decelerate(void)
 			iError=0;
 			last_iError =0;
 			if(en_t.Home_flag ==1)en_t.End_flag =1;
-			printf("Stop60 CurrPos : %ld\r\n", mHorCurPosValue);
+			printf("Stop60 CurrPos : %ld\r\n", HALL_Pulse);
 			}
 							
 
@@ -170,9 +170,9 @@ void Spring_Horizon_Decelerate(void)
 
 		if(dError_sum > 1000)dError_sum = 1000; /*error accumulate */
 		if(dError_sum < -1000)dError_sum = -1000; 
-		PID_PWM_Duty = (int32_t)(iError *pid_r.KP_H + dError_sum * pid_r.KI_H + (iError - last_iError)*pid_r.KD_H);//proportion + itegral + differential
+		PID_PWM_Duty = (float)((float)(iError /1000) + (float)(dError_sum /10000) + (float)((iError - last_iError)/1000));//proportion + itegral + differential
 
-		printf("hor_pwm= %ld\r \n",PID_PWM_Duty);
+		printf("hor_pwm= %d \r\n",PID_PWM_Duty);
         
         if(abs(PID_PWM_Duty) >=70) PID_PWM_Duty =70;
         
@@ -214,7 +214,7 @@ void Spring_Vertical_Decelerate(void)
 	   if(abs(en_t.X_axis) > 100){
 			
 			 
-			 if((abs(en_t.X_axis) + 4000) <= abs(HALL_Pulse)){ //|| (2 * en_t.X_axis -8000) < abs(HALL_Pulse)){
+			 if((abs(en_t.X_axis) + 4500) <= abs(HALL_Pulse)){ //|| (2 * en_t.X_axis -8000) < abs(HALL_Pulse)){
 			  
 				for(ldectnum =0;ldectnum<70;ldectnum++){
 				 ldectnum++;

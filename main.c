@@ -127,15 +127,15 @@ int main(void)
     /***********motor run main*********************/
      if((motor_ref.motor_run == 1)&&(en_t.HorizonStop_flag !=2)&&(en_t.eInit_n !=0))
      {
-   		  if(en_t.eInit_n ==1){
+   		  
 	          if(en_t.DIR_flag ==1)PWM_Duty =70;
 
 			  else PWM_Duty = PID_PWM_Duty;
-   		  }
+   		  
 			   
    		  
          /* horizon decelerate region*/
-		 if(en_t.HorizonStop_flag ==1 && en_t.eInit_n ==1){
+		 if(en_t.HorizonStop_flag ==1 ){
 
 				Balance_HorizonRegion();
 					
@@ -170,8 +170,9 @@ int main(void)
 			if(Dir == 0)//CCW  Horizion Direction
 			{
 						en_t.DIR_flag =0;
+						printf("horTimeHALL = %d \r\n",HALL_Pulse);
 					    Spring_Horizon_Decelerate();
-						printf("PID_PWM_H 25 = %d\r\n",PID_PWM_Duty);
+						
 				
 			}
 			else{  //Vertical Position judge is boundary
