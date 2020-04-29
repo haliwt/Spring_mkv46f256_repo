@@ -78,6 +78,8 @@ void Search_Start_HorizonPos(void);
 void iPrintf(void);
 void Balance_HorizonRegion(void);
 void Stop_Fun(void);
+void Horizon_StopRegion(void);
+
 
 
 

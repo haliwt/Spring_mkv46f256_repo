@@ -130,14 +130,11 @@ void Spring_Horizon_Decelerate(void)
 	
 	
 	if(en_t.X_axis < 200){/*refer vertical*/
-      if(abs((abs(en_t.Y_axis)-HALL_Pulse)) <50 ){
+      if(abs(HALL_Pulse) <50 ){
 		PWM_Duty =30;
 		uwStep = HallSensor_GetPinState();
 		HALLSensor_Detected_BLDC(PWM_Duty);
-		en_t.HorizonStop_flag =1;
-		 en_t.oneKey_H_flag = 1;
-		 en_t.oneKey_V_flag =0;
-		 en_t.Home_flag = 1;
+		en_t.HorizonStop_flag =1; /*input decelerate region flag*/
 		 dError_sum = 0;
 		 iError=0;
 		 last_iError =0;
@@ -146,16 +143,13 @@ void Spring_Horizon_Decelerate(void)
      }
 	else if(abs(en_t.X_axis) >800){
 
-		
-		if((en_t.X_axis - HALL_Pulse) < 50 ){
+		if((en_t.X_axis - HALL_Pulse) < 50 && (en_t.X_axis - HALL_Pulse)> 0 ){
 			
-				
-				PWM_Duty =30;
-				uwStep = HallSensor_GetPinState();
-				HALLSensor_Detected_BLDC(PWM_Duty);
-			en_t.HorizonStop_flag =1;
-			en_t.oneKey_H_flag = 1;
-		    en_t.oneKey_V_flag =0;
+			PWM_Duty =30;
+			uwStep = HallSensor_GetPinState();
+			HALLSensor_Detected_BLDC(PWM_Duty);
+			en_t.HorizonStop_flag =1; /*input decelerate region flag*/
+		
 			dError_sum = 0;
 			iError=0;
 			last_iError =0;
@@ -165,12 +159,18 @@ void Spring_Horizon_Decelerate(void)
 							
 
 	}
-
+    if(en_t.HorizonStop_flag ==1){/*input horizon banance region*/
+		Dir =1;
+		PWM_Duty =30;
+		uwStep = HallSensor_GetPinState();
+		HALLSensor_Detected_BLDC(PWM_Duty);
+	}
+	else{
         dError_sum += iError; 
 
 		if(dError_sum > 1000)dError_sum = 1000; /*error accumulate */
 		if(dError_sum < -1000)dError_sum = -1000; 
-		PID_PWM_Duty = (float)((float)(iError /1000) + (float)(dError_sum /10000) + (float)((iError - last_iError)/1000));//proportion + itegral + differential
+		PID_PWM_Duty = (int32_t)((float)(iError /1000) + (float)(dError_sum /10000) + (float)((iError - last_iError)/1000));//proportion + itegral + differential
 
 		printf("hor_pwm= %d \r\n",PID_PWM_Duty);
         
@@ -182,19 +182,6 @@ void Spring_Horizon_Decelerate(void)
 		last_iError = iError;
 		PWM_Duty = PID_PWM_Duty;
 		
-		
-	if(en_t.HorizonStop_flag ==2){
-		Dir = 1;
-		PWM_Duty = 30;
-		iError =0;
-		last_iError =0;
-		HALL_Pulse =0;
-   }
-	if(en_t.HorizonStop_flag ==1){
-		Dir =1;
-		PWM_Duty =30;
-		uwStep = HallSensor_GetPinState();
-		HALLSensor_Detected_BLDC(PWM_Duty);
 	}
 
 }
@@ -212,9 +199,7 @@ void Spring_Vertical_Decelerate(void)
 	uint16_t ldectnum;
 
 	   if(abs(en_t.X_axis) > 100){
-			
-			 
-			 if((abs(en_t.X_axis) + 4500) <= abs(HALL_Pulse)){ //|| (2 * en_t.X_axis -8000) < abs(HALL_Pulse)){
+			if((abs(en_t.X_axis) + 4500) <= abs(HALL_Pulse)){ //|| (2 * en_t.X_axis -8000) < abs(HALL_Pulse)){
 			  
 				for(ldectnum =0;ldectnum<70;ldectnum++){
 				 ldectnum++;
@@ -366,45 +351,46 @@ void Balance_HorizonRegion(void)
 	uint16_t z=0;
 	
 	mCurPosValue = HALL_Pulse; /*read current position of value*/
-	lhorizonpos =abs(abs(en_t.X_axis) - abs(HALL_Pulse));
+	lhorizonpos =en_t.X_axis - HALL_Pulse ;
 
 	printf("stop lhorizonpos = %d \n",lhorizonpos);
 
 	if(en_t.X_axis < 100){
-			if(lhorizonpos <=100 ){
+			if(lhorizonpos <=100 && lhorizonpos < 0 ){
 
-				for(z=0;z<50;z++){
+				for(z=0;z<70;z++){
 					
-				
+				Dir =1;
 				PID_PWM_Duty =PID_PWM_Duty - z;
 				if(PID_PWM_Duty <= 0)PID_PWM_Duty =0;
 				PWM_Duty =PID_PWM_Duty ;
 				uwStep = HallSensor_GetPinState();
 				HALLSensor_Detected_BLDC(PWM_Duty);
-				
-			   motor_ref.motor_run =0;
-			
-				DelayMs(1);
+				Dir =0 ;
+				DelayMs(3);
 				Stop_Fun();
 				printf("X_axis <100 ~~~~~~~~~~~~~~~~~~~~~~\n");
 				
-			}
+			    }
+				motor_ref.motor_run =0;
+				//en_t.HorizonStop_flag =2;
 	   }
 	}
 	else if(en_t.X_axis > 800){
-				if(lhorizonpos > 50){
-					for(z=0;z<70;z++){
+				if(lhorizonpos > 50 && lhorizonpos > 0){
+					for(z=0;z<30;z++){
 			           
-						PID_PWM_Duty =PID_PWM_Duty - z;
-						if(PID_PWM_Duty <= 0)PID_PWM_Duty =0;
-						PWM_Duty =PID_PWM_Duty ;
+						Dir = 1;
+						PWM_Duty =30 - z;
 						uwStep = HallSensor_GetPinState();
 						HALLSensor_Detected_BLDC(PWM_Duty);
-						motor_ref.motor_run =0;
-						DelayMs(1);
+						Dir =0;
+						DelayMs(3);
 						printf("X_axis>800 Stop&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
 						Stop_Fun();
 					}
+					motor_ref.motor_run =0;
+				  //  en_t.HorizonStop_flag =2;
 				}
 	 }
 	
@@ -436,19 +422,11 @@ void iPrintf(void)
 **********************************************************/
 void Stop_Fun(void)
 {
-	       
-			PWM_Duty =0 ;
-			PMW_AllClose_ABC_Channel();
-			
-		
-			  
-			  DelayMs(50);
-			  GPIO_PortToggle(GPIOD,1<<BOARD_LED1_GPIO_PIN);
-			  DelayMs(50);
-			  
-
-
-
+	PWM_Duty =0 ;
+	PMW_AllClose_ABC_Channel();
+	DelayMs(50);
+	GPIO_PortToggle(GPIOD,1<<BOARD_LED1_GPIO_PIN);
+	DelayMs(50);
 }
 /************************************************
 	*
@@ -509,8 +487,47 @@ static void CoilSpring_Run_VerticalLockHall(void)
       }
 	 
 	}	
-
-
+}
+/************************************************************
+	*
+	*Function Name:void Horizon_StopRegion(void)
+	*Function :Horizon pole stop region different
+	*		   stop ,this is balance horizon
+	*
+	*
+*************************************************************/
+void Horizon_StopRegion(void)
+{
+      uint32_t lstn=0;
+			en_t.DIR_flag = 1;
+			Dir =1;
+			PWM_Duty =30; /*real be test*/
+			uwStep = HallSensor_GetPinState();
+			HALLSensor_Detected_BLDC(PWM_Duty);
+			
+			//Dir =0;
+			PRINTF("flag=2 stop CurrPos !!!!!!!\n");
+			for(lstn=0;lstn < 20000;lstn ++){
+				Dir =1;
+				PWM_Duty =30; /*real be test*/
+				uwStep = HallSensor_GetPinState();
+				HALLSensor_Detected_BLDC(PWM_Duty);
+			   // Dir =0;
+			}
+		   if(refer_t.key_automatic_flag==1){
+	
+				for(lstn=0;lstn < 20000;lstn ++){
+				Dir =1;
+				PWM_Duty =30; /*real be test*/
+				uwStep = HallSensor_GetPinState();
+				HALLSensor_Detected_BLDC(PWM_Duty);
+			   // Dir =0;
+				}
+			   en_t.HorizonStop_flag= 0;
+			   motor_ref.motor_run =1;
+			   en_t.DIR_flag = 1;
+			 
+		   }
 
 
 }

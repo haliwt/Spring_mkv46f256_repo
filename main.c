@@ -44,7 +44,7 @@ int32_t PID_Result;
 PID_TypeDef  sPID;
 __IO int32_t  PID_PWM_Duty;
 BLDC_Typedef BLDCMotor;
-reference_t greference_t ;
+
 
 
  
@@ -128,13 +128,7 @@ int main(void)
      if((motor_ref.motor_run == 1)&&(en_t.HorizonStop_flag !=2)&&(en_t.eInit_n !=0))
      {
    		  
-	          if(en_t.DIR_flag ==1)PWM_Duty =70;
-
-			  else PWM_Duty = PID_PWM_Duty;
-   		  
-			   
-   		  
-         /* horizon decelerate region*/
+	     /* horizon balance region*/
 		 if(en_t.HorizonStop_flag ==1 ){
 
 				Balance_HorizonRegion();
@@ -143,6 +137,9 @@ int main(void)
 		/* motor run */
 		if(Dir==0)
 	  	{
+			 if(en_t.DIR_flag ==1)PWM_Duty =70;
+             else PWM_Duty = PID_PWM_Duty;
+			 
 			  uwStep = HallSensor_GetPinState();
 	          HALLSensor_Detected_BLDC(PWM_Duty);
 	  	}
@@ -152,16 +149,7 @@ int main(void)
 	         HALLSensor_Detected_BLDC(PWM_Duty);
 	  	}
 		
-		
-    
-#if 0
-         if(Dir == 0){
-	          
-	         iPrintf();
-		 }
-#endif
-		
-         Time_CNT++;
+	 Time_CNT++;
 #if 1    
         /* 100ms arithmetic PID */
     	if((Time_CNT % 25 == 0)&&(en_t.eInit_n == 1)&&(en_t.HorizonStop_flag !=2)&&(en_t.HorizonStop_flag !=1)){
@@ -191,40 +179,8 @@ int main(void)
 	 } 
      else if(en_t.HorizonStop_flag==2){
           
-		  en_t.DIR_flag = 1;
-          Dir =1;
-          PWM_Duty =30; /*real be test*/
-          uwStep = HallSensor_GetPinState();
-          HALLSensor_Detected_BLDC(PWM_Duty);
- 		  
-          //Dir =0;
-		  PRINTF("flag=2 stop CurrPos !!!!!!!\n");
-		  for(lstn=0;lstn < 20000;lstn ++){
-		      Dir =1;
-	          PWM_Duty =30; /*real be test*/
-	          uwStep = HallSensor_GetPinState();
-	          HALLSensor_Detected_BLDC(PWM_Duty);
-	 		 // Dir =0;
-		  }
-		 if(greference_t.key_automatic_flag==1){
-
-		      for(lstn=0;lstn < 20000;lstn ++){
-		      Dir =1;
-	          PWM_Duty =30; /*real be test*/
-	          uwStep = HallSensor_GetPinState();
-	          HALLSensor_Detected_BLDC(PWM_Duty);
-	 		 // Dir =0;
-		      }
-			 en_t.HorizonStop_flag= 0;
-             motor_ref.motor_run =1;
-		     en_t.DIR_flag = 1;
-		     for(lkeydir=0;lkeydir< 1000;lkeydir++){
-				  Dir =1;
-				  PWM_Duty =50; /*real be test*/
-		          uwStep = HallSensor_GetPinState();
-		          HALLSensor_Detected_BLDC(PWM_Duty);
-				}
-		 }
+		
+		 Horizon_StopRegion();
 
 	}
     else if(en_t.eInit_n !=0){ 
@@ -259,7 +215,7 @@ int main(void)
 					}
          
 		
-		 if(greference_t.key_automatic_flag==1){
+		 if(refer_t.key_automatic_flag==1){
 		   
 		   Dir = 0;
 		   en_t.HorizonStop_flag= 0;
@@ -348,12 +304,12 @@ int main(void)
 
 				   j++;
 				   if(j==1){
-				      greference_t.key_automatic_flag = 1;
+				      refer_t.key_automatic_flag = 1;
 					  printf("AUTO BE TEST @@@@@@@@@@@@@@@@@@@@@@@@\n");
 				   	}
 				   else{
 				   	    j=0;
-						greference_t.key_automatic_flag = 0;
+						refer_t.key_automatic_flag = 0;
 				   	}
 				   
 					 
